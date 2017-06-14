@@ -38,6 +38,8 @@ typedef struct
     int paramCount;
     // Method is static?
     char isStatic;
+    // Method is varargs?
+    char isVarArgs;
     // Method parameter types. Will be NULL, if parameter_count == 0.
     JPy_ParamDescriptor* paramDescriptors;
     // Method return type. Will be NULL for constructors.
@@ -84,6 +86,7 @@ JPy_JMethod* JMethod_New(JPy_JType* declaringClass,
                          JPy_ParamDescriptor* paramDescriptors,
                          JPy_ReturnDescriptor* returnDescriptor,
                          jboolean isStatic,
+                         jboolean isVarArgs,
                          jmethodID mid);
 
 void JMethod_Del(JPy_JMethod* method);

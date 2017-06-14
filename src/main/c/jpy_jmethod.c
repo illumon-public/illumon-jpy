@@ -29,6 +29,7 @@ JPy_JMethod* JMethod_New(JPy_JType* declaringClass,
                          JPy_ParamDescriptor* paramDescriptors,
                          JPy_ReturnDescriptor* returnDescriptor,
                          jboolean isStatic,
+                         jboolean isVarArgs,
                          jmethodID mid)
 {
     PyTypeObject* type = &JMethod_Type;
@@ -41,6 +42,7 @@ JPy_JMethod* JMethod_New(JPy_JType* declaringClass,
     method->paramDescriptors = paramDescriptors;
     method->returnDescriptor = returnDescriptor;
     method->isStatic = isStatic;
+    method->isVarArgs = isVarArgs;
     method->mid = mid;
 
     Py_INCREF(declaringClass);
@@ -93,30 +95,52 @@ int JMethod_MatchPyArgs(JNIEnv* jenv, JPy_JType* declaringClass, JPy_JMethod* me
     int matchValue;
     int i;
     int i0;
+    int iLast;
 
     if (method->isStatic) {
-        //printf("Static! method->paramCount=%d, argCount=%d\n", method->paramCount, argCount);
-        if (method->paramCount != argCount) {
-            JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: argument count mismatch (matchValue=0)\n");
-            // argument count mismatch
-            return 0;
-        }
-        if (method->paramCount == 0) {
-            JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: no-argument static method (matchValue=100)\n");
-            // There can't be any other static method overloads with no parameters
-            return 100;
-        }
+        if (method->isVarArgs) {
+            if(argCount < method->paramCount - 1) {
+                JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: var args argument count mismatch java=%d, python=%d (matchValue=0)\n", method->paramCount, argCount);
+                // argument count mismatch
+                return 0;
+            }
+            iLast = method->paramCount - 1;
+        } else {
+            if (method->paramCount != argCount) {
+                JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: argument count mismatch (matchValue=0)\n");
+                // argument count mismatch
+                return 0;
+            }
+            if (method->paramCount == 0) {
+                JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: no-argument static method (matchValue=100)\n");
+                // There can't be any other static method overloads with no parameters
+                return 100;
+            }
 
-        i0 = 0;
+            iLast = argCount;
+        }
         matchValueSum = 0;
+        i0 = 0;
     } else {
         PyObject* self;
-        //printf("Non-Static! method->paramCount=%d, argCount=%d\n", method->paramCount, argCount);
-        if (method->paramCount != argCount - 1) {
+        //printf("Non-Static! method->paramCount=%d, argCount=%d, isVarArg=%d\n", method->paramCount, argCount, method->isVarArgs);
+
+        if (method->isVarArgs) {
+            if (argCount < method->paramCount) {
+                JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: var args argument count mismatch java=%d, python=%d (matchValue=0)\n", method->paramCount, argCount);
+                // argument count mismatch
+                return 0;
+            }
+            iLast = method->paramCount;
+        }
+        else if (method->paramCount != argCount - 1) {
             JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: argument count mismatch (matchValue=0)\n");
             // argument count mismatch
             return 0;
+        } else {
+            iLast = method->paramCount + 1;
         }
+
         self = PyTuple_GetItem(pyArgs, 0);
         if (self == Py_None) {
             JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: self argument is None (matchValue=0)\n");
@@ -141,8 +165,7 @@ int JMethod_MatchPyArgs(JNIEnv* jenv, JPy_JType* declaringClass, JPy_JMethod* me
     }
 
     paramDescriptor = method->paramDescriptors;
-    for (i = i0; i < argCount; i++) {
-
+    for (i = i0; i < iLast; i++) {
         pyArg = PyTuple_GetItem(pyArgs, i);
         matchValue = paramDescriptor->MatchPyArg(jenv, paramDescriptor, pyArg);
 
@@ -156,6 +179,21 @@ int JMethod_MatchPyArgs(JNIEnv* jenv, JPy_JType* declaringClass, JPy_JMethod* me
 
         matchValueSum += matchValue;
         paramDescriptor++;
+    }
+    if (method->isVarArgs) {
+        if (argCount - i == 0) {
+            matchValueSum += 10;
+            JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: isVarArgs, argCount = %d, paramCount = %d, matchValueSum=%d\n", argCount, method->paramCount, matchValueSum);
+        } else {
+            JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: isVarArgs, argCount = %d, paramCount = %d, starting matchValue=%d\n", argCount, method->paramCount, matchValueSum);
+            matchValue = paramDescriptor->MatchVarArgPyArg(jenv, paramDescriptor, pyArgs, i);
+            JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_MatchPyArgs: isVarArgs, paramDescriptor->type->javaName='%s', matchValue=%d\n", paramDescriptor->type->javaName, matchValue);
+            if (matchValue == 0) {
+                return 0;
+            }
+            matchValueSum += matchValue;
+        }
+
     }
 
     //printf("JMethod_MatchPyArgs 7\n");
@@ -194,10 +232,14 @@ PyObject* JMethod_InvokeMethod(JNIEnv* jenv, JPy_JMethod* method, PyObject* pyAr
     JPy_JType* returnType;
     jclass classRef;
 
-    //printf("JMethod_InvokeMethod 1: typeCode=%c\n", typeCode);
+    JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_InvokeMethod Entry Point: %s\n", JPy_AS_UTF8(method->name));
+
+//    printf("JMethod_InvokeMethod 1: typeCode=%c\n", typeCode);
     if (JMethod_CreateJArgs(jenv, method, pyArgs, &jArgs, &argDisposers) < 0) {
         return NULL;
     }
+
+    JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JMethod_InvokeMethod Arguments Created\n");
 
     //printf("JMethod_InvokeMethod 2: typeCode=%c\n", typeCode);
 
@@ -328,7 +370,8 @@ error:
 int JMethod_CreateJArgs(JNIEnv* jenv, JPy_JMethod* method, PyObject* pyArgs, jvalue** argValuesRet, JPy_ArgDisposer** argDisposersRet)
 {
     JPy_ParamDescriptor* paramDescriptor;
-    int i, i0, argCount;
+    Py_ssize_t i, i0, iLast;
+    Py_ssize_t argCount;
     PyObject* pyArg;
     jvalue* jValue;
     jvalue* jValues;
@@ -343,10 +386,17 @@ int JMethod_CreateJArgs(JNIEnv* jenv, JPy_JMethod* method, PyObject* pyArgs, jva
 
     argCount = PyTuple_Size(pyArgs);
 
-    i0 = argCount - method->paramCount;
-    if (!(i0 == 0 || i0 == 1)) {
-        PyErr_SetString(PyExc_RuntimeError, "internal error");
-        return -1;
+    if (method->isVarArgs) {
+        // need to know if we expect a self parameter
+        i0 = method->isStatic ? 0 : 1;
+        iLast = method->isStatic ? method->paramCount - 1 : method->paramCount;
+    } else {
+        i0 = argCount - method->paramCount;
+        if (!(i0 == 0 || i0 == 1)) {
+            PyErr_SetString(PyExc_RuntimeError, "internal error");
+            return -1;
+        }
+        iLast = argCount;
     }
 
     jValues = PyMem_New(jvalue, method->paramCount);
@@ -365,7 +415,7 @@ int JMethod_CreateJArgs(JNIEnv* jenv, JPy_JMethod* method, PyObject* pyArgs, jva
     paramDescriptor = method->paramDescriptors;
     jValue = jValues;
     argDisposer = argDisposers;
-    for (i = i0; i < argCount; i++) {
+    for (i = i0; i < iLast; i++) {
         pyArg = PyTuple_GetItem(pyArgs, i);
         jValue->l = 0;
         argDisposer->data = NULL;
@@ -378,6 +428,16 @@ int JMethod_CreateJArgs(JNIEnv* jenv, JPy_JMethod* method, PyObject* pyArgs, jva
         paramDescriptor++;
         jValue++;
         argDisposer++;
+    }
+    if (method->isVarArgs) {
+        jValue->l = 0;
+        argDisposer->data = NULL;
+        argDisposer->DisposeArg = NULL;
+        if (paramDescriptor->ConvertVarArgPyArg(jenv, paramDescriptor, pyArgs, i, jValue, argDisposer) < 0) {
+            PyMem_Del(jValues);
+            PyMem_Del(argDisposers);
+            return -1;
+        }
     }
 
     *argValuesRet = jValues;
@@ -616,14 +676,15 @@ JPy_MethodFindResult;
 
 JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod* overloadedMethod, PyObject* pyArgs, JPy_MethodFindResult* result)
 {
-    int overloadCount;
-    int argCount;
+    Py_ssize_t overloadCount;
+    Py_ssize_t argCount;
     int matchCount;
     int matchValue;
     int matchValueMax;
     JPy_JMethod* currMethod;
     JPy_JMethod* bestMethod;
     int i;
+    int j;
 
     result->method = NULL;
     result->matchValue = 0;
@@ -640,17 +701,20 @@ JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod* 
     matchValueMax = -1;
     bestMethod = NULL;
 
-    JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JOverloadedMethod_FindMethod0: method '%s#%s': overloadCount=%d\n",
-                              overloadedMethod->declaringClass->javaName, JPy_AS_UTF8(overloadedMethod->name), overloadCount);
+    JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JOverloadedMethod_FindMethod0: method '%s#%s': overloadCount=%d, argCount=%d\n",
+                              overloadedMethod->declaringClass->javaName, JPy_AS_UTF8(overloadedMethod->name), overloadCount, argCount);
 
     for (i = 0; i < overloadCount; i++) {
         currMethod = (JPy_JMethod*) PyList_GetItem(overloadedMethod->methodList, i);
         matchValue = JMethod_MatchPyArgs(jenv, overloadedMethod->declaringClass, currMethod, argCount, pyArgs);
 
-        JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JOverloadedMethod_FindMethod0: methodList[%d]: paramCount=%d, matchValue=%d\n", i,
-                                  currMethod->paramCount, matchValue);
+        JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JOverloadedMethod_FindMethod0: methodList[%d]: paramCount=%d, matchValue=%d, isVarArgs=%d\n", i,
+                                  currMethod->paramCount, matchValue, currMethod->isVarArgs);
 
         if (matchValue > 0) {
+			for (j = 0; j < currMethod->paramCount; ++j) {
+				JPy_DIAG_PRINT(JPy_DIAG_F_METH, "\tARG[%d]->type->javaName = %s\n", j, currMethod->paramDescriptors[j].type->javaName);
+			}
             if (matchValue > matchValueMax) {
                 matchValueMax = matchValue;
                 bestMethod = currMethod;
@@ -658,7 +722,7 @@ JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod* 
             } else if (matchValue == matchValueMax) {
                 matchCount++;
             }
-            if (matchValue >= 100 * argCount) {
+            if (!currMethod->isVarArgs && (matchValue >= 100 * argCount)) {
                 // we can't get any better (if so, we have an internal problem)
                 break;
             }
