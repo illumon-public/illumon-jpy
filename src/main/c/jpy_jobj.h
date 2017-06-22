@@ -37,8 +37,8 @@ JPy_JObj;
 
 int JObj_Check(PyObject* arg);
 
-JPy_JObj* JObj_New(JNIEnv* jenv, jobject objectRef);
-JPy_JObj* JObj_FromType(JNIEnv* jenv, JPy_JType* type, jobject objectRef);
+PyObject* JObj_New(JNIEnv* jenv, jobject objectRef);
+PyObject* JObj_FromType(JNIEnv* jenv, JPy_JType* type, jobject objectRef);
 
 int JObj_InitTypeSlots(PyTypeObject* type, const char* typeName, PyTypeObject* superType);
 
