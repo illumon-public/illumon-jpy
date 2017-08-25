@@ -90,10 +90,9 @@ class TestOtherMethodResolutionCases(unittest.TestCase):
     # see https://github.com/bcdev/jpy/issues/55
     def test_toReproduceAndFixIssue55(self):
         Paths = jpy.get_type('java.nio.file.Paths')
-        # The following outcommented statement is will end in a Python error
-        # RuntimeError: no matching Java method overloads found
-        #p = Paths.get('testfile')
-        # This is the embarrassing workaround
+        # The following statement will execute the var args method without any arguments
+        p = Paths.get('testfile')
+        # This is the workaround that was previously required
         p = Paths.get('testfile', [])
 
     # see https://github.com/bcdev/jpy/issues/56

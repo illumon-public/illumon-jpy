@@ -116,12 +116,14 @@ int JObj_init(JPy_JObj* self, PyObject* args, PyObject* kwds)
         return -1;
     }
 
-    jMethod = JOverloadedMethod_FindMethod(jenv, (JPy_JOverloadedMethod*) constructor, args, JNI_FALSE);
+    int isVarArgsArray;
+
+    jMethod = JOverloadedMethod_FindMethod(jenv, (JPy_JOverloadedMethod*) constructor, args, JNI_FALSE, &isVarArgsArray);
     if (jMethod == NULL) {
         return -1;
     }
 
-    if (JMethod_CreateJArgs(jenv, jMethod, args, &jArgs, &jDisposers) < 0) {
+    if (JMethod_CreateJArgs(jenv, jMethod, args, &jArgs, &jDisposers, isVarArgsArray) < 0) {
         return -1;
     }
 

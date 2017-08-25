@@ -75,7 +75,7 @@ JPy_JOverloadedMethod;
  */
 extern PyTypeObject JOverloadedMethod_Type;
 
-JPy_JMethod*           JOverloadedMethod_FindMethod(JNIEnv* jenv, JPy_JOverloadedMethod* overloadedMethod, PyObject* argTuple, jboolean visitSuperClass);
+JPy_JMethod*           JOverloadedMethod_FindMethod(JNIEnv* jenv, JPy_JOverloadedMethod* overloadedMethod, PyObject* argTuple, jboolean visitSuperClass, int *isVarArgsArray);
 JPy_JMethod*           JOverloadedMethod_FindStaticMethod(JPy_JOverloadedMethod* overloadedMethod, PyObject* argTuple);
 JPy_JOverloadedMethod* JOverloadedMethod_New(JPy_JType* declaringClass, PyObject* name, JPy_JMethod* method);
 int                    JOverloadedMethod_AddMethod(JPy_JOverloadedMethod* overloadedMethod, JPy_JMethod* method);
@@ -93,7 +93,7 @@ void JMethod_Del(JPy_JMethod* method);
 
 int JMethod_ConvertToJavaValues(JNIEnv* jenv, JPy_JMethod* jMethod, int argCount, PyObject* argTuple, jvalue* jArgs);
 
-int  JMethod_CreateJArgs(JNIEnv* jenv, JPy_JMethod* jMethod, PyObject* argTuple, jvalue** jValues, JPy_ArgDisposer** jDisposers);
+int  JMethod_CreateJArgs(JNIEnv* jenv, JPy_JMethod* jMethod, PyObject* argTuple, jvalue** jValues, JPy_ArgDisposer** jDisposers, int isVarArgsArray);
 void JMethod_DisposeJArgs(JNIEnv* jenv, int paramCount, jvalue* jValues, JPy_ArgDisposer* jDisposers);
 
 #ifdef __cplusplus
