@@ -749,8 +749,10 @@ JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod* 
                 bestMethod = currMethod;
                 matchCount = 1;
                 bestIsVarArgsArray = currentIsVarArgsArray;
+                JPy_DIAG_PRINT(JPy_DIAG_F_METH, "\tnew best yet match: %d\n", matchValue);
             } else if (matchValue == matchValueMax) {
                 matchCount++;
+                JPy_DIAG_PRINT(JPy_DIAG_F_METH, "\tadding to existing match: %d\n", matchCount);
             }
             if (!currMethod->isVarArgs && (matchValue >= 100 * argCount)) {
                 // we can't get any better (if so, we have an internal problem)
@@ -805,7 +807,8 @@ JPy_JMethod* JOverloadedMethod_FindMethod(JNIEnv* jenv, JPy_JOverloadedMethod* o
             return NULL;
         }
         if (result.method != NULL) {
-            if (result.matchValue >= 100 * argCount) {
+            // in the case
+            if (result.matchValue >= 100 * argCount && result.matchCount == 1) {
                 // We can't get any better.
                 *isVarArgsArray = result.isVarArgsArray;
                 return result.method;
