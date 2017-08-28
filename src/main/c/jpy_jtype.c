@@ -1081,11 +1081,8 @@ int JType_ProcessClassMethods(JNIEnv* jenv, JPy_JType* type)
 
     classRef = type->classRef;
 
-    if (type->isInterface) {
-        methods = (*jenv)->CallObjectMethod(jenv, classRef, JPy_Class_GetMethods_MID);
-    } else {
-        methods = (*jenv)->CallObjectMethod(jenv, classRef, JPy_Class_GetDeclaredMethods_MID);
-    }
+    // use GetMethods for either an interface or a class so that we can handle Java 8 Defaulted Methods
+    methods = (*jenv)->CallObjectMethod(jenv, classRef, JPy_Class_GetMethods_MID);
     methodCount = (*jenv)->GetArrayLength(jenv, methods);
 
     JPy_DIAG_PRINT(JPy_DIAG_F_TYPE, "JType_ProcessClassMethods: methodCount=%d\n", methodCount);
