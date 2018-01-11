@@ -119,8 +119,7 @@ JPy_JType* JType_GetTypeForName(JNIEnv* jenv, const char* typeName, jboolean res
     }
 
     if (classRef == NULL || (*jenv)->ExceptionCheck(jenv)) {
-        (*jenv)->ExceptionClear(jenv);
-        PyErr_Format(PyExc_ValueError, "Java class '%s' not found", typeName);
+        JPy_HandleJavaException(jenv);
         return NULL;
     }
 
