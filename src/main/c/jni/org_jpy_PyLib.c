@@ -861,12 +861,34 @@ JNIEXPORT jint JNICALL Java_org_jpy_PyLib_getIntValue
     JPy_BEGIN_GIL_STATE
 
     pyObject = (PyObject*) objId;
-    value = (jint) JPy_AS_CLONG(pyObject);
+    value = (jint) JPy_AS_JINT(pyObject);
 
     JPy_END_GIL_STATE
 
     return value;
 }
+
+/*
+ * Class:     org_jpy_PyLib
+ * Method:    getLongValue
+ * Signature: (J)J
+ */
+JNIEXPORT jlong JNICALL Java_org_jpy_PyLib_getLongValue
+  (JNIEnv *jenv, jclass jlibClass, jlong objId)
+{
+    PyObject* pyObject;
+    jlong value;
+
+    JPy_BEGIN_GIL_STATE
+
+    pyObject = (PyObject*) objId;
+    value = (jint) JPy_AS_JLONG(pyObject);
+
+    JPy_END_GIL_STATE
+
+    return value;
+}
+
 
 /**
  * Used to convert a python object into it's corresponding boolean.  If the PyObject is not a boolean;

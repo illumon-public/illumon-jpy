@@ -147,6 +147,14 @@ public class PyObject implements java.io.Serializable {
     }
 
     /**
+     * @return This Python object as a Java {@code long} value.
+     */
+    public long getLongValue() {
+        assertPythonRuns();
+        return PyLib.getLongValue(getPointer());
+    }
+
+    /**
      * @return This Python object as a Java {@code boolean} value.
      */
     public boolean getBooleanValue() {

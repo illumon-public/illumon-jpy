@@ -251,6 +251,8 @@ public class PyLib {
 
     static native int getIntValue(long pointer);
 
+    static native long getLongValue(long pointer);
+
     static native boolean getBooleanValue(long pointer);
 
     static native double getDoubleValue(long pointer);
