@@ -2144,7 +2144,7 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
                 PyBuffer_Release(pyBuffer);
                 PyMem_Del(pyBuffer);
                 PyErr_Format(PyExc_ValueError,
-                             "illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
+                             "DEVON DEVON DEVON EDIT 2 illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
                              itemCount * itemSize, bufferLen, itemSize, bufferItemSize);
                 return -1;
             }
