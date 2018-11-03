@@ -2075,8 +2075,8 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
         JPy_JType* paramComponentType = paramType->componentType;
 
         PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON EDIT20 paramDescripter = %p, paramType was %p paramComponentType was %p",
-                                             (void*)paramDescriptor, (void*)paramType, (void*)paramComponentType);
+                                             "DEVON DEVON DEVON EDIT20 java type name = %c",
+                                             paramType->javaName);
         return -1;
 
         if (paramComponentType != NULL && paramComponentType->isPrimitive && PyObject_CheckBuffer(pyArg)) {
