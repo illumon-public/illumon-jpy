@@ -2075,7 +2075,7 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
         JPy_JType* paramComponentType = paramType->componentType;
 
         PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON EDIT19 java component type name %c",
+                                             "DEVON DEVON DEVON EDIT18 java component type name %c",
                                              paramComponentType->javaName);
         return -1;
 
