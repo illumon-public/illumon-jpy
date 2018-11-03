@@ -1791,16 +1791,9 @@ int JType_ConvertVarArgPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* para
                 return -1;
             }
 
-
-            printf("Devon Was Here\n");
-            printf("Devon Was Here 2\n");
-
-
             if (pyBuffer->len != itemCount * itemSize) {
-                printf(paramComponentType);
                 Py_ssize_t bufferLen = pyBuffer->len;
                 Py_ssize_t bufferItemSize = pyBuffer->itemsize;
-                //printf("%ld, %ld, %ld, %ld\n", pyBuffer->len , pyBuffer->itemsize, itemCount, itemSize);
                 //printf("%ld, %ld, %ld, %ld\n", pyBuffer->len , pyBuffer->itemsize, itemCount, itemSize);
                 PyBuffer_Release(pyBuffer);
                 PyMem_Del(pyBuffer);
@@ -2074,11 +2067,6 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
         JPy_JType* paramType = paramDescriptor->type;
         JPy_JType* paramComponentType = paramType->componentType;
 
-
-
-        return -1;
-        }
-
         if (paramComponentType != NULL && paramComponentType->isPrimitive && PyObject_CheckBuffer(pyArg)) {
             Py_buffer* pyBuffer;
             int flags;
@@ -2145,7 +2133,6 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
             }
 
             if (pyBuffer->len != itemCount * itemSize) {
-
                 Py_ssize_t bufferLen = pyBuffer->len;
                 Py_ssize_t bufferItemSize = pyBuffer->itemsize;
                 //printf("%ld, %ld, %ld, %ld\n", pyBuffer->len , pyBuffer->itemsize, itemCount, itemSize);
