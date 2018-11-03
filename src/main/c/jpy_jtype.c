@@ -2117,9 +2117,17 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
             } else if (paramComponentType == JPy_JInt) {
                 jArray = (*jenv)->NewIntArray(jenv, itemCount);
                 itemSize = sizeof(jint);
+                PyErr_Format(PyExc_ValueError,
+                                             "DEVON DEVON DEVON paramComponentType was JPY_JINT item size = %d",
+                                             itemSize);
+                return -1;
             } else if (paramComponentType == JPy_JLong) {
                 jArray = (*jenv)->NewLongArray(jenv, itemCount);
                 itemSize = sizeof(jlong);
+                PyErr_Format(PyExc_ValueError,
+                                             "DEVON DEVON DEVON paramComponentType was JPy_JLong item size = %d",
+                                             itemSize);
+                return -1;
             } else if (paramComponentType == JPy_JFloat) {
                 jArray = (*jenv)->NewFloatArray(jenv, itemCount);
                 itemSize = sizeof(jfloat);
@@ -2144,7 +2152,7 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
                 PyBuffer_Release(pyBuffer);
                 PyMem_Del(pyBuffer);
                 PyErr_Format(PyExc_ValueError,
-                             "DEVON DEVON DEVON EDIT 2 illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
+                             "DEVON DEVON DEVON EDIT TAKE 3 illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
                              itemCount * itemSize, bufferLen, itemSize, bufferItemSize);
                 return -1;
             }
