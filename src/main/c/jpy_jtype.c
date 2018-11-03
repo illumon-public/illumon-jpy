@@ -2075,8 +2075,8 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
         JPy_JType* paramComponentType = paramType->componentType;
 
         PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON EDIT19 java type name = %c java is primitive %c java component type name %c",
-                                             paramType->javaName, paramType->isPrimitive, paramComponentType->javaName);
+                                             "DEVON DEVON DEVON EDIT19 java component type name %c",
+                                             paramComponentType->javaName);
         return -1;
 
         if (paramComponentType != NULL && paramComponentType->isPrimitive && PyObject_CheckBuffer(pyArg)) {
