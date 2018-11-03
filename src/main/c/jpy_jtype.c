@@ -2074,7 +2074,14 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
         JPy_JType* paramType = paramDescriptor->type;
         JPy_JType* paramComponentType = paramType->componentType;
 
+
+        if (paramComponentType != NULL) {
+        PyErr_Format(PyExc_ValueError,
+                                             "DEVON DEVON DEVON EDIT18 java component type name %c",
+                                             paramComponentType->javaName);
+
         return -1;
+        }
 
         if (paramComponentType != NULL && paramComponentType->isPrimitive && PyObject_CheckBuffer(pyArg)) {
             Py_buffer* pyBuffer;
@@ -2119,10 +2126,6 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
             } else if (paramComponentType == JPy_JInt) {
                 jArray = (*jenv)->NewIntArray(jenv, itemCount);
                 itemSize = sizeof(jint);
-
-        PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON EDIT17 java component type name %c",
-                                             paramComponentType->javaName);
                 PyErr_Format(PyExc_ValueError,
                                              "DEVON DEVON DEVON paramComponentType was JPY_JINT item size = %d",
                                              itemSize);
