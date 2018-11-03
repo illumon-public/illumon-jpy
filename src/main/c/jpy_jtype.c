@@ -2075,10 +2075,6 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
         JPy_JType* paramComponentType = paramType->componentType;
 
 
-        if (paramComponentType != NULL) {
-        PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON EDIT18 java component type name %c",
-                                             paramComponentType->javaName);
 
         return -1;
         }
@@ -2126,17 +2122,15 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
             } else if (paramComponentType == JPy_JInt) {
                 jArray = (*jenv)->NewIntArray(jenv, itemCount);
                 itemSize = sizeof(jint);
-                PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON paramComponentType was JPY_JINT item size = %d",
-                                             itemSize);
-                return -1;
+
+                if (pyBuffer->len != itemCount * itemSize) {
+                    jArray = (*jenv)->NewLongArray(jenv, itemCount);
+                    itemSize = sizeof(jlong);
+                }
+
             } else if (paramComponentType == JPy_JLong) {
                 jArray = (*jenv)->NewLongArray(jenv, itemCount);
                 itemSize = sizeof(jlong);
-                PyErr_Format(PyExc_ValueError,
-                                             "DEVON DEVON DEVON paramComponentType was JPy_JLong item size = %d",
-                                             itemSize);
-                return -1;
             } else if (paramComponentType == JPy_JFloat) {
                 jArray = (*jenv)->NewFloatArray(jenv, itemCount);
                 itemSize = sizeof(jfloat);
@@ -2151,9 +2145,6 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
             }
 
             if (pyBuffer->len != itemCount * itemSize) {
-
-                printf("Devon Was Here 3\n");
-                printf("Devon Was Here 4\n");
 
                 Py_ssize_t bufferLen = pyBuffer->len;
                 Py_ssize_t bufferItemSize = pyBuffer->itemsize;
