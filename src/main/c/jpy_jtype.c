@@ -53,6 +53,15 @@ static int JType_MatchVarArgPyArgIntType(const JPy_ParamDescriptor *paramDescrip
 
 JPy_JType* JType_GetTypeForObject(JNIEnv* jenv, jobject objectRef)
 {
+            FILE *f = fopen("fileGTFO.txt", "w");
+            if (f == NULL)
+            {
+                printf("Error opening file!\n");
+                exit(1);
+            }
+            fprintf(f, "JType_GetTypeForObject called");
+            fclose(f);
+
     JPy_JType* type;
     jclass classRef;
     classRef = (*jenv)->GetObjectClass(jenv, objectRef);
@@ -64,6 +73,16 @@ JPy_JType* JType_GetTypeForObject(JNIEnv* jenv, jobject objectRef)
 
 JPy_JType* JType_GetTypeForName(JNIEnv* jenv, const char* typeName, jboolean resolve)
 {
+
+            FILE *f = fopen("fileGTFN.txt", "w");
+            if (f == NULL)
+            {
+                printf("Error opening file!\n");
+                exit(1);
+            }
+            fprintf(f, "JType_GetTypeForObject called %c", typeName);
+            fclose(f);
+
     const char* resourceName;
     jclass classRef;
 
@@ -883,6 +902,22 @@ jboolean JType_AcceptMethod(JPy_JType* declaringClass, JPy_JMethod* method)
 
 int JType_ProcessMethod(JNIEnv* jenv, JPy_JType* type, PyObject* methodKey, const char* methodName, jclass returnType, jarray paramTypes, jboolean isStatic, jboolean isVarArgs, jmethodID mid)
 {
+    FILE *f = fopen("filePM.txt", "w");
+            if (f == NULL)
+            {
+                printf("Error opening file!\n");
+                exit(1);
+            }
+
+            /* print some text */
+            const char *text = "JType_ProcessMethod called";
+            fprintf(f, "Method name: %c\n", *methodName);
+            fprintf(f, "paramDescriptor type == object ?");
+            bool isObject = paramType == JPy_JObject;
+            fprintf(f, isObject ? "True" : "false");
+            fclose(f);
+
+
     JPy_ParamDescriptor* paramDescriptors = NULL;
     JPy_ReturnDescriptor* returnDescriptor = NULL;
     jint paramCount;
@@ -2253,7 +2288,25 @@ void JType_DisposeWritableBufferArg(JNIEnv* jenv, jvalue* value, void* data)
 
 void JType_InitParamDescriptorFunctions(JPy_ParamDescriptor* paramDescriptor, jboolean isLastVarArg)
 {
+
+
     JPy_JType* paramType = paramDescriptor->type;
+
+
+    FILE *f = fopen("fileIPDF.txt", "w");
+        if (f == NULL)
+        {
+            printf("Error opening file!\n");
+            exit(1);
+        }
+
+        /* print some text */
+        const char *text = "JType_InitParamDescriptorFunctions called";
+        fprintf(f, "Some text: %s\n", text);
+        fprintf(f, "paramDescriptor type == object ?");
+        bool isObject = paramType == JPy_JObject;
+        fprintf(f, isObject ? "True" : "false");
+        fclose(f);
 
     if (paramType == JPy_JVoid) {
         paramDescriptor->MatchPyArg = NULL;
