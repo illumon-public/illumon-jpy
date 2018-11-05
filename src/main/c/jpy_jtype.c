@@ -912,8 +912,6 @@ int JType_ProcessMethod(JNIEnv* jenv, JPy_JType* type, PyObject* methodKey, cons
             /* print some text */
             const char *text = "JType_ProcessMethod called";
             fprintf(f, "Method name: %c\n", *methodName);
-            fprintf(f, "paramDescriptor type == object ?");
-            fprintf(f, paramType == JPy_JObject ? "True" : "false");
             fclose(f);
 
 
@@ -2303,8 +2301,7 @@ void JType_InitParamDescriptorFunctions(JPy_ParamDescriptor* paramDescriptor, jb
         const char *text = "JType_InitParamDescriptorFunctions called";
         fprintf(f, "Some text: %s\n", text);
         fprintf(f, "paramDescriptor type == object ?");
-        bool isObject = paramType == JPy_JObject;
-        fprintf(f, isObject ? "True" : "false");
+        fprintf(f, paramType == JPy_JObject ? "True" : "false");
         fclose(f);
 
     if (paramType == JPy_JVoid) {
