@@ -2049,6 +2049,17 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
 
 int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescriptor, PyObject* pyArg, jvalue* value, JPy_ArgDisposer* disposer)
 {
+    FILE *f = fopen("file.txt", "w");
+    if (f == NULL)
+    {
+        printf("Error opening file!\n");
+        exit(1);
+    }
+
+    /* print some text */
+    const char *text = "Write this to the file";
+    fprintf(f, "Some text: %s\n", text);
+
     if (pyArg == Py_None) {
         // Py_None maps to (Java) NULL
         value->l = NULL;
