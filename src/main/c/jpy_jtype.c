@@ -2059,6 +2059,7 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
     /* print some text */
     const char *text = "Write this to the file";
     fprintf(f, "Some text: %s\n", text);
+    fclose(f);
 
     if (pyArg == Py_None) {
         // Py_None maps to (Java) NULL
