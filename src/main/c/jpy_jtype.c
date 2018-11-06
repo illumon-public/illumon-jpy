@@ -1874,6 +1874,15 @@ int JType_ConvertVarArgPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* para
 
 int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyArg)
 {
+    FILE *f = fopen("fileMPAAO.txt", "w");
+                if (f == NULL)
+                {
+                    printf("Error opening file!\n");
+                    exit(1);
+                }
+                fprintf(f, "JType_MatchPyArgAsJObject called");
+
+
     JPy_JType* argType;
     JPy_JType* paramComponentType;
     JPy_JType* argComponentType;
@@ -1920,11 +1929,14 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
     // pyArg is not a Java object
 
     if (paramComponentType != NULL) {
+
+                fprintf(f, "JType_MatchPyArgAsJObject called pyArg non java object, param type is array");
         // The parameter type is an array type
 
         if (paramComponentType->isPrimitive && PyObject_CheckBuffer(pyArg)) {
             Py_buffer view;
 
+                fprintf(f, "JType_MatchPyArgAsJObject called param type primitive array type, pyAry is a python buffer object");
             // The parameter type is a primitive array type, pyArg is a Python buffer object
 
             if (PyObject_GetBuffer(pyArg, &view, PyBUF_FORMAT) == 0) {
@@ -1936,6 +1948,8 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                 type = paramComponentType;
                 matchValue = 0;
                 if (view.format != NULL) {
+
+                fprintf(f, "JType_MatchPyArgAsJObject called view.format is non null");
                     char format = *view.format;
                     if (type == JPy_JBoolean) {
                         matchValue = format == 'b' || format == 'B' ? 100
@@ -2075,6 +2089,7 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
             }
         }
     }
+                fclose(f);
 
     return 0;
 }
