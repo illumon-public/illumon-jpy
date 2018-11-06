@@ -53,15 +53,6 @@ static int JType_MatchVarArgPyArgIntType(const JPy_ParamDescriptor *paramDescrip
 
 JPy_JType* JType_GetTypeForObject(JNIEnv* jenv, jobject objectRef)
 {
-            FILE *f = fopen("fileGTFO.txt", "w");
-            if (f == NULL)
-            {
-                printf("Error opening file!\n");
-                exit(1);
-            }
-            fprintf(f, "JType_GetTypeForObject called");
-            fclose(f);
-
     JPy_JType* type;
     jclass classRef;
     classRef = (*jenv)->GetObjectClass(jenv, objectRef);
@@ -73,16 +64,6 @@ JPy_JType* JType_GetTypeForObject(JNIEnv* jenv, jobject objectRef)
 
 JPy_JType* JType_GetTypeForName(JNIEnv* jenv, const char* typeName, jboolean resolve)
 {
-
-            FILE *f = fopen("fileGTFN.txt", "w");
-            if (f == NULL)
-            {
-                printf("Error opening file!\n");
-                exit(1);
-            }
-            fprintf(f, "JType_GetTypeForObject called %c", typeName);
-            fclose(f);
-
     const char* resourceName;
     jclass classRef;
 
@@ -902,19 +883,6 @@ jboolean JType_AcceptMethod(JPy_JType* declaringClass, JPy_JMethod* method)
 
 int JType_ProcessMethod(JNIEnv* jenv, JPy_JType* type, PyObject* methodKey, const char* methodName, jclass returnType, jarray paramTypes, jboolean isStatic, jboolean isVarArgs, jmethodID mid)
 {
-    FILE *f = fopen("filePM.txt", "w");
-            if (f == NULL)
-            {
-                printf("Error opening file!\n");
-                exit(1);
-            }
-
-            /* print some text */
-            const char *text = "JType_ProcessMethod called";
-            fprintf(f, "Method name: %c\n", *methodName);
-            fclose(f);
-
-
     JPy_ParamDescriptor* paramDescriptors = NULL;
     JPy_ReturnDescriptor* returnDescriptor = NULL;
     jint paramCount;
@@ -1830,7 +1798,7 @@ int JType_ConvertVarArgPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* para
                 PyBuffer_Release(pyBuffer);
                 PyMem_Del(pyBuffer);
                 PyErr_Format(PyExc_ValueError,
-                             "illegal buffer argument: expected size was %ld bytes, but got DEVON DEVON DEVON %ld (expected item size was %d bytes, got %ld)",
+                             "illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
                              itemCount * itemSize, bufferLen, itemSize, bufferItemSize);
                 return -1;
             }
@@ -1874,15 +1842,6 @@ int JType_ConvertVarArgPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* para
 
 int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyArg)
 {
-    FILE *f = fopen("fileMPAAO.txt", "w");
-                if (f == NULL)
-                {
-                    printf("Error opening file!\n");
-                    exit(1);
-                }
-                fprintf(f, "JType_MatchPyArgAsJObject called");
-
-
     JPy_JType* argType;
     JPy_JType* paramComponentType;
     JPy_JType* argComponentType;
@@ -1890,8 +1849,6 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
 
     if (pyArg == Py_None) {
         // Signal it is possible, but give low priority since we cannot perform any type checks on 'None'
-                fprintf(f, "JType_MatchPyArgAsJObject called return point 1");
-                fclose(f);
         return 1;
     }
 
@@ -1903,8 +1860,6 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
         argType = (JPy_JType*) Py_TYPE(pyArg);
         if (argType == paramType) {
             // pyArg has same type as the parameter
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 2");
-                            fclose(f);
             return 100;
         }
 
@@ -1913,42 +1868,31 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
             argComponentType = argType->componentType;
             if (argComponentType == paramComponentType) {
                 // pyArg is an instance of parameter type, and they both have the same component types (which may be null)
-                fprintf(f, "JType_MatchPyArgAsJObject called return point 3");
-                                fclose(f);
                 return 90;
             }
             if (argComponentType != NULL && paramComponentType != NULL) {
                 // Determines whether an object of clazz1 can be safely cast to clazz2.
                 if ((*jenv)->IsAssignableFrom(jenv, argComponentType->classRef, paramComponentType->classRef)) {
                     // pyArg is an instance of parameter array type, and component types are compatible
-                    fprintf(f, "JType_MatchPyArgAsJObject called return point 4");
-                                    fclose(f);
                     return 80;
                 }
             }
             // Honour that pyArg is compatible with paramType, but better matches may exist.
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 5");
-                            fclose(f);
             return 10;
         }
 
         // pyArg type does not match parameter type
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 6");
-                        fclose(f);
         return 0;
     }
 
     // pyArg is not a Java object
 
     if (paramComponentType != NULL) {
-
-                fprintf(f, "JType_MatchPyArgAsJObject called pyArg non java object, param type is array");
         // The parameter type is an array type
 
         if (paramComponentType->isPrimitive && PyObject_CheckBuffer(pyArg)) {
             Py_buffer view;
 
-                fprintf(f, "JType_MatchPyArgAsJObject called param type primitive array type, pyAry is a python buffer object");
             // The parameter type is a primitive array type, pyArg is a Python buffer object
 
             if (PyObject_GetBuffer(pyArg, &view, PyBUF_FORMAT) == 0) {
@@ -1960,8 +1904,6 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                 type = paramComponentType;
                 matchValue = 0;
                 if (view.format != NULL) {
-
-                fprintf(f, "JType_MatchPyArgAsJObject called view.format is non null\n");
                     char format = *view.format;
                     if (type == JPy_JBoolean) {
                         matchValue = format == 'b' || format == 'B' ? 100
@@ -1984,7 +1926,6 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                                    : view.itemsize == 2 ? 10
                                    : 0;
                     } else if (type == JPy_JInt) {
-                fprintf(f, "JType_MatchPyArgAsJObject type == JINT format == %c\n", format);
                         matchValue = format == 'i' ? 100
                                    : format == 'I' ? 90
                                    : view.itemsize == 4 ? 10
@@ -2025,8 +1966,6 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                 }
 
                 PyBuffer_Release(&view);
-                fprintf(f, "JType_MatchPyArgAsJObject called return point 7");
-                                fclose(f);
                 return matchValue;
             }
         } else if (PySequence_Check(pyArg)) {
@@ -2040,34 +1979,22 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                     PyObject *element = PySequence_GetItem(pyArg, ii);
                     if (!JPy_IS_STR(element)) {
                         // if the element is not a string, this is not a good match
-                        fprintf(f, "JType_MatchPyArgAsJObject called return point 8");
-                                        fclose(f);
                         return 0;
                     }
                 }
 
                 // a String sequence is a good match for a String array
-                fprintf(f, "JType_MatchPyArgAsJObject called return point 9");
-                                fclose(f);
                 return 80;
             }
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 10");
-                            fclose(f);
             return 10;
         }
     } else if (paramType == JPy_JObject) {
         // Parameter type is not an array type, but any other Java object type
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 11");
-                        fclose(f);
         return 10;
     } else if (paramType == JPy_JBooleanObj) {
         if (PyBool_Check(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 12");
-                        fclose(f);
             return 100;
         } else if (JPy_IS_CLONG(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 13");
-                        fclose(f);
             return 10;
         }
     } else if (paramType == JPy_JCharacterObj
@@ -2076,88 +2003,53 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                || paramType == JPy_JIntegerObj
                || paramType == JPy_JLongObj) {
         if (JPy_IS_CLONG(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 14");
-                        fclose(f);
             return 100;
         } else if (PyBool_Check(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 15");
-                        fclose(f);
             return 10;
         }
     } else if (paramType == JPy_JFloatObj
                || paramType == JPy_JDoubleObj) {
         if (PyFloat_Check(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 16");
-                        fclose(f);
             return 100;
         } else if (JPy_IS_CLONG(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 17");
-                        fclose(f);
             return 90;
         } else if (PyBool_Check(pyArg)) {
-        fprintf(f, "JType_MatchPyArgAsJObject called return point 18");
-                        fclose(f);
             return 10;
         }
     } else {
         if (JPy_IS_STR(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_JString->classRef, paramType->classRef)) {
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 19");
-                            fclose(f);
                 return 80;
             }
         }
         else if (PyBool_Check(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_Boolean_JClass, paramType->classRef)) {
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 20");
-                            fclose(f);
                 return 80;
             }
         }
         else if (JPy_IS_CLONG(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_Integer_JClass, paramType->classRef)) {
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 21");
-                            fclose(f);
                 return 80;
             }
             else if ((*jenv)->IsAssignableFrom(jenv, JPy_Long_JClass, paramType->classRef)) {
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 22");
-                            fclose(f);
                 return 80;
             }
         }
         else if (PyFloat_Check(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_Double_JClass, paramType->classRef)) {
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 23");
-                            fclose(f);
                 return 80;
             }
             else if ((*jenv)->IsAssignableFrom(jenv, JPy_Float_JClass, paramType->classRef)) {
-            fprintf(f, "JType_MatchPyArgAsJObject called return point 24");
-                            fclose(f);
                 return 80;
             }
         }
     }
-fprintf(f, "JType_MatchPyArgAsJObject called return point 25");
-                fclose(f);
+
     return 0;
 }
 
 int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescriptor, PyObject* pyArg, jvalue* value, JPy_ArgDisposer* disposer)
 {
-    FILE *f = fopen("file.txt", "w");
-    if (f == NULL)
-    {
-        printf("Error opening file!\n");
-        exit(1);
-    }
-
-    /* print some text */
-    const char *text = "Write this to the file";
-    fprintf(f, "Some text: %s\n", text);
-    fclose(f);
-
     if (pyArg == Py_None) {
         // Py_None maps to (Java) NULL
         value->l = NULL;
@@ -2219,12 +2111,6 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
             } else if (paramComponentType == JPy_JInt) {
                 jArray = (*jenv)->NewIntArray(jenv, itemCount);
                 itemSize = sizeof(jint);
-
-                if (pyBuffer->len != itemCount * itemSize) {
-                    jArray = (*jenv)->NewLongArray(jenv, itemCount);
-                    itemSize = sizeof(jlong);
-                }
-
             } else if (paramComponentType == JPy_JLong) {
                 jArray = (*jenv)->NewLongArray(jenv, itemCount);
                 itemSize = sizeof(jlong);
@@ -2248,7 +2134,7 @@ int JType_ConvertPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* paramDescr
                 PyBuffer_Release(pyBuffer);
                 PyMem_Del(pyBuffer);
                 PyErr_Format(PyExc_ValueError,
-                             "DEVON DEVON DEVON EDIT TAKE 3 illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
+                             "illegal buffer argument: expected size was %ld bytes, but got %ld (expected item size was %d bytes, got %ld)",
                              itemCount * itemSize, bufferLen, itemSize, bufferItemSize);
                 return -1;
             }
@@ -2350,24 +2236,7 @@ void JType_DisposeWritableBufferArg(JNIEnv* jenv, jvalue* value, void* data)
 
 void JType_InitParamDescriptorFunctions(JPy_ParamDescriptor* paramDescriptor, jboolean isLastVarArg)
 {
-
-
     JPy_JType* paramType = paramDescriptor->type;
-
-
-    FILE *f = fopen("fileIPDF.txt", "w");
-        if (f == NULL)
-        {
-            printf("Error opening file!\n");
-            exit(1);
-        }
-
-        /* print some text */
-        const char *text = "JType_InitParamDescriptorFunctions called";
-        fprintf(f, "Some text: %s\n", text);
-        fprintf(f, "paramDescriptor type == object ?");
-        fprintf(f, paramType == JPy_JObject ? "True" : "false");
-        fclose(f);
 
     if (paramType == JPy_JVoid) {
         paramDescriptor->MatchPyArg = NULL;
