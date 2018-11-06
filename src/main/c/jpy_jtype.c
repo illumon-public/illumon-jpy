@@ -1842,6 +1842,15 @@ int JType_ConvertVarArgPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* para
 
 int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyArg)
 {
+    FILE *f = fopen("fileMPAAO.txt", "w");
+                if (f == NULL)
+                {
+                    printf("Error opening file!\n");
+                    exit(1);
+                }
+                fprintf(f, "JType_MatchPyArgAsJObject called");
+
+
     JPy_JType* argType;
     JPy_JType* paramComponentType;
     JPy_JType* argComponentType;
