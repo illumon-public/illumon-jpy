@@ -1842,15 +1842,6 @@ int JType_ConvertVarArgPyArgToJObjectArg(JNIEnv* jenv, JPy_ParamDescriptor* para
 
 int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyArg)
 {
-    FILE *f = fopen("fileMPAAO.txt", "w");
-                if (f == NULL)
-                {
-                    printf("Error opening file!\n");
-                    exit(1);
-                }
-                fprintf(f, "JType_MatchPyArgAsJObject called");
-
-
     JPy_JType* argType;
     JPy_JType* paramComponentType;
     JPy_JType* argComponentType;
@@ -1940,7 +1931,6 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                                    : view.itemsize == 4 ? 10
                                    : 0;
                     } else if (type == JPy_JLong) {
-                fprintf(f, "JType_MatchPyArgAsJObject type == JLONG format == %c\n", format);
                         matchValue = format == 'q' || format == 'l' ? 100
                                    : format == 'Q' || format == 'L' ? 90
                                    : view.itemsize == 8 ? 10
