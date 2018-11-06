@@ -1890,6 +1890,8 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
 
     if (pyArg == Py_None) {
         // Signal it is possible, but give low priority since we cannot perform any type checks on 'None'
+                fprintf(f, "JType_MatchPyArgAsJObject called return point 1");
+                fclose(f);
         return 1;
     }
 
@@ -1901,6 +1903,8 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
         argType = (JPy_JType*) Py_TYPE(pyArg);
         if (argType == paramType) {
             // pyArg has same type as the parameter
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 2");
+                            fclose(f);
             return 100;
         }
 
@@ -1909,20 +1913,28 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
             argComponentType = argType->componentType;
             if (argComponentType == paramComponentType) {
                 // pyArg is an instance of parameter type, and they both have the same component types (which may be null)
+                fprintf(f, "JType_MatchPyArgAsJObject called return point 3");
+                                fclose(f);
                 return 90;
             }
             if (argComponentType != NULL && paramComponentType != NULL) {
                 // Determines whether an object of clazz1 can be safely cast to clazz2.
                 if ((*jenv)->IsAssignableFrom(jenv, argComponentType->classRef, paramComponentType->classRef)) {
                     // pyArg is an instance of parameter array type, and component types are compatible
+                    fprintf(f, "JType_MatchPyArgAsJObject called return point 4");
+                                    fclose(f);
                     return 80;
                 }
             }
             // Honour that pyArg is compatible with paramType, but better matches may exist.
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 5");
+                            fclose(f);
             return 10;
         }
 
         // pyArg type does not match parameter type
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 6");
+                        fclose(f);
         return 0;
     }
 
@@ -2011,6 +2023,8 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                 }
 
                 PyBuffer_Release(&view);
+                fprintf(f, "JType_MatchPyArgAsJObject called return point 7");
+                                fclose(f);
                 return matchValue;
             }
         } else if (PySequence_Check(pyArg)) {
@@ -2024,22 +2038,34 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                     PyObject *element = PySequence_GetItem(pyArg, ii);
                     if (!JPy_IS_STR(element)) {
                         // if the element is not a string, this is not a good match
+                        fprintf(f, "JType_MatchPyArgAsJObject called return point 8");
+                                        fclose(f);
                         return 0;
                     }
                 }
 
                 // a String sequence is a good match for a String array
+                fprintf(f, "JType_MatchPyArgAsJObject called return point 9");
+                                fclose(f);
                 return 80;
             }
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 10");
+                            fclose(f);
             return 10;
         }
     } else if (paramType == JPy_JObject) {
         // Parameter type is not an array type, but any other Java object type
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 11");
+                        fclose(f);
         return 10;
     } else if (paramType == JPy_JBooleanObj) {
         if (PyBool_Check(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 12");
+                        fclose(f);
             return 100;
         } else if (JPy_IS_CLONG(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 13");
+                        fclose(f);
             return 10;
         }
     } else if (paramType == JPy_JCharacterObj
@@ -2048,49 +2074,71 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                || paramType == JPy_JIntegerObj
                || paramType == JPy_JLongObj) {
         if (JPy_IS_CLONG(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 14");
+                        fclose(f);
             return 100;
         } else if (PyBool_Check(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 15");
+                        fclose(f);
             return 10;
         }
     } else if (paramType == JPy_JFloatObj
                || paramType == JPy_JDoubleObj) {
         if (PyFloat_Check(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 16");
+                        fclose(f);
             return 100;
         } else if (JPy_IS_CLONG(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 17");
+                        fclose(f);
             return 90;
         } else if (PyBool_Check(pyArg)) {
+        fprintf(f, "JType_MatchPyArgAsJObject called return point 18");
+                        fclose(f);
             return 10;
         }
     } else {
         if (JPy_IS_STR(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_JString->classRef, paramType->classRef)) {
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 19");
+                            fclose(f);
                 return 80;
             }
         }
         else if (PyBool_Check(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_Boolean_JClass, paramType->classRef)) {
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 20");
+                            fclose(f);
                 return 80;
             }
         }
         else if (JPy_IS_CLONG(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_Integer_JClass, paramType->classRef)) {
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 21");
+                            fclose(f);
                 return 80;
             }
             else if ((*jenv)->IsAssignableFrom(jenv, JPy_Long_JClass, paramType->classRef)) {
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 22");
+                            fclose(f);
                 return 80;
             }
         }
         else if (PyFloat_Check(pyArg)) {
             if ((*jenv)->IsAssignableFrom(jenv, JPy_Double_JClass, paramType->classRef)) {
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 23");
+                            fclose(f);
                 return 80;
             }
             else if ((*jenv)->IsAssignableFrom(jenv, JPy_Float_JClass, paramType->classRef)) {
+            fprintf(f, "JType_MatchPyArgAsJObject called return point 24");
+                            fclose(f);
                 return 80;
             }
         }
     }
+fprintf(f, "JType_MatchPyArgAsJObject called return point 25");
                 fclose(f);
-
     return 0;
 }
 
