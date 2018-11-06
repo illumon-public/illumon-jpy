@@ -1961,7 +1961,7 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                 matchValue = 0;
                 if (view.format != NULL) {
 
-                fprintf(f, "JType_MatchPyArgAsJObject called view.format is non null");
+                fprintf(f, "JType_MatchPyArgAsJObject called view.format is non null\n");
                     char format = *view.format;
                     if (type == JPy_JBoolean) {
                         matchValue = format == 'b' || format == 'B' ? 100
@@ -1984,11 +1984,13 @@ int JType_MatchPyArgAsJObject(JNIEnv* jenv, JPy_JType* paramType, PyObject* pyAr
                                    : view.itemsize == 2 ? 10
                                    : 0;
                     } else if (type == JPy_JInt) {
+                fprintf(f, "JType_MatchPyArgAsJObject type == JINT format == %c\n", format);
                         matchValue = format == 'i' || format == 'l' ? 100
                                    : format == 'I' || format == 'L' ? 90
                                    : view.itemsize == 4 ? 10
                                    : 0;
                     } else if (type == JPy_JLong) {
+                fprintf(f, "JType_MatchPyArgAsJObject type == JLONG format == %c\n", format);
                         matchValue = format == 'q' ? 100
                                    : format == 'Q' ? 90
                                    : view.itemsize == 8 ? 10
