@@ -26,9 +26,9 @@
 
     <groupId>org.jpy</groupId>
     <artifactId>jpy</artifactId>
-    <version>0.10.0-SNAPSHOT</version>
+    <version>${DEEPHAVEN_VERSION}</version>
     <packaging>jar</packaging>
-    <name>Java-Python Bridge</name>
+    <name>Deephaven fork of jpy Bi-directional Python-Java bridge</name>
 
     <description>
         jpy is a bi-directional Java-Python bridge which you can use to embed Java code in Python programs or the other
@@ -42,7 +42,7 @@
         </license>
     </licenses>
 
-    <url>https://github.com/bcdev/jpy</url>
+    <url>https://github.com/illumon-public/illumon-jpy</url>
     <inceptionYear>2014</inceptionYear>
 
     <organization>

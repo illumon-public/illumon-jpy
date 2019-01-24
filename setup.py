@@ -127,7 +127,7 @@ libraries = [jpyutil.JVM_LIB_NAME]
 
 define_macros = []
 extra_link_args = []
-extra_compile_args = []
+extra_compile_args = ["-std=c99"]
 
 if platform.system() == 'Windows':
     define_macros += [('WIN32', '1')]
@@ -307,15 +307,15 @@ class JpyInstall(install):
         install.run(self)
 
 
-setup(name='jpy',
-      description='Bi-directional Python-Java bridge',
-             long_description=_read('README.md') + '\n\n' + _read('CHANGES.md'),
+setup(name='deephaven-jpy',
+      description='Deephaven fork of jpy Bi-directional Python-Java bridge',
+             long_description=_read('README-deephaven.md') + '\n\n' + _read('CHANGES.md'),
              version=__version__,
       platforms='Windows, Linux, Darwin',
-      author=__author__,
-      author_email='norman.fomferra@brockmann-consult.de',
-      maintainer='Brockmann Consult GmbH',
-      maintainer_email='norman.fomferra@brockmann-consult.de',
+      author='Deephaven Data Labs',
+      author_email='python@deephaven.io',
+      maintainer='Deephaven Data Labs',
+      maintainer_email='python@deephaven.io',
       license=__license__,
       url='https://github.com/bcdev/jpy',
       download_url='https://pypi.python.org/pypi/jpy/' + __version__,
@@ -360,4 +360,5 @@ setup(name='jpy',
                    'Programming Language :: Python :: 3',
                    'Programming Language :: Python :: 3.3',
                    'Programming Language :: Python :: 3.4',
-                   'Programming Language :: Python :: 3.5'])
+                   'Programming Language :: Python :: 3.5',
+                   'Programming Language :: Python :: 3.6'])
