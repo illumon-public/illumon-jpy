@@ -19,4 +19,6 @@ lib/
 Vagrantfile
 *.so
 *.dll
-
+jpyutil.py
+pom.xml
+deephaven_jpy.egg-info
