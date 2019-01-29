@@ -96,7 +96,8 @@ int JObj_init(JPy_JObj* self, PyObject* args, PyObject* kwds)
     JPy_JType* jType;
     PyObject* constructor;
     JPy_JMethod* jMethod;
-    jobject objectRef;
+    jobject localRef;
+    jobject globalRef;
     jvalue* jArgs;
     JPy_ArgDisposer* jDisposers;
     int isVarArgsArray;
@@ -133,10 +134,10 @@ int JObj_init(JPy_JObj* self, PyObject* args, PyObject* kwds)
 
     JPy_DIAG_PRINT(JPy_DIAG_F_MEM, "JObj_init: calling Java constructor %s\n", jType->javaName);
 
-    objectRef = (*jenv)->NewObjectA(jenv, jType->classRef, jMethod->mid, jArgs);
+    localRef = (*jenv)->NewObjectA(jenv, jType->classRef, jMethod->mid, jArgs);
     JPy_ON_JAVA_EXCEPTION_RETURN(-1);
 
-    if (objectRef == NULL) {
+    if (localRef == NULL) {
         PyErr_NoMemory();
         return -1;
     }
@@ -145,8 +146,11 @@ int JObj_init(JPy_JObj* self, PyObject* args, PyObject* kwds)
         JMethod_DisposeJArgs(jenv, jMethod->paramCount, jArgs, jDisposers);
     }
 
-    objectRef = (*jenv)->NewGlobalRef(jenv, objectRef);
-    if (objectRef == NULL) {
+    globalRef = (*jenv)->NewGlobalRef(jenv, localRef);
+
+    (*jenv)->DeleteLocalRef(jenv, localRef);
+
+    if (globalRef == NULL) {
         PyErr_NoMemory();
         return -1;
     }
@@ -156,7 +160,7 @@ int JObj_init(JPy_JObj* self, PyObject* args, PyObject* kwds)
         (*jenv)->DeleteGlobalRef(jenv, self->objectRef);
     }
 
-    self->objectRef = objectRef;
+    self->objectRef = globalRef;
 
     JPy_DIAG_PRINT(JPy_DIAG_F_MEM, "JObj_init: self->objectRef=%p\n", self->objectRef);
 
