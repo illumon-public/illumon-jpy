@@ -581,8 +581,11 @@ PyObject* JPy_array(PyObject* self, PyObject* args)
     JNIEnv* jenv;
     JPy_JType* componentType;
     jarray arrayRef;
+    //jarray* arrayRefRef;
+    jarray globalRef;
     PyObject* objType;
     PyObject* objInit;
+    PyObject* result;
 
     JPy_GET_JNI_ENV_OR_RETURN(jenv, NULL)
 
@@ -637,12 +640,22 @@ PyObject* JPy_array(PyObject* self, PyObject* args)
         if (arrayRef == NULL) {
             return PyErr_NoMemory();
         }
-        return JObj_New(jenv, arrayRef);
+        result = JObj_New(jenv, arrayRef);
+        (*jenv)->DeleteLocalRef(jenv, arrayRef);
+        return result;
     } else if (PySequence_Check(objInit)) {
+        // JType_CreateJavaArray is a bit messy since it reuses a local reference
+        // We need to keep around a pointer to it so we can get back to it and clean it up after
+        // the call
+        //arrayRefRef = &arrayRef;
         if (JType_CreateJavaArray(jenv, componentType, objInit, &arrayRef, JNI_FALSE) < 0) {
+            //(*jenv)->DeleteLocalRef(jenv, *arrayRefRef);
             return NULL;
         }
-        return JObj_New(jenv, arrayRef);
+        //(*jenv)->DeleteLocalRef(jenv, *arrayRefRef);
+        result = JObj_New(jenv, arrayRef);
+        (*jenv)->DeleteLocalRef(jenv, arrayRef);
+        return result;
     } else {
         PyErr_SetString(PyExc_ValueError, "array: argument 2 (init) must be either an integer array length or any sequence");
         return NULL;
