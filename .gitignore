@@ -13,10 +13,10 @@ winbuild.log
 local.dat
 setup.out
 *.pyc
-jpy.egg-info
+deephaven_jpy.egg-info
 lib/
 .vagrant
 Vagrantfile
 *.so
 *.dll
-
+.gradle
