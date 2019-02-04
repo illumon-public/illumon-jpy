@@ -15,7 +15,7 @@
 # limitations under the License.
 import sys
 import os
-import os.path
+import re
 import platform
 import subprocess
 import shutil
@@ -37,7 +37,30 @@ import jpyutil
 __author__ = jpyutil.__author__
 __copyright__ = jpyutil.__copyright__
 __license__ = jpyutil.__license__
-__version__ = jpyutil.__version__
+
+def lookup_version():
+  uppath = lambda _path, n: os.sep.join(_path.split(os.sep)[:-n])
+  iris_root = uppath(os.path.abspath(__file__), 3)
+  gradle_properties = os.path.join(iris_root, "gradle.properties")
+
+  if not os.path.exists(gradle_properties):
+    raise ValueError("The gradle.properties file does not exist at {}".format(iris_root))
+
+  # fetch the version string from the gradle.properties file
+  with open(gradle_properties, 'r') as f:
+    check = re.search('versionSource=(.*?)\n', f.read().strip())
+
+  if check is None:
+    raise ValueError("The deephaven release version (versionSource=`version`) "
+                     "could not be discovered in {}".format(gradle_properties))
+
+  release_name = check.group(1)
+
+  release_version = os.path.join(iris_root, 'gradle', 'versions', release_name)
+  with open(release_version, 'r') as f:
+    return f.read().strip()
+
+__version__ = lookup_version()
 
 base_dir = os.path.dirname(os.path.relpath(__file__))
 src_main_c_dir = os.path.join(base_dir, 'src', 'main', 'c')
@@ -52,6 +75,9 @@ elif 'install' in sys.argv:
 else:
     print('Note that you can use non-standard global option [--maven] '
           'to force a Java Maven build for the jpy Java API')
+
+# todo: consider if we actually need to do this
+skip_write_jpy_config = True
 
 sources = [
     os.path.join(src_main_c_dir, 'jpy_module.c'),
@@ -130,7 +156,7 @@ libraries = [jpyutil.JVM_LIB_NAME]
 
 define_macros = []
 extra_link_args = []
-extra_compile_args = []
+extra_compile_args = ["-std=c99"]
 
 if platform.system() == 'Windows':
     define_macros += [('WIN32', '1')]
@@ -221,6 +247,8 @@ def _write_jpy_config(target_dir=None, install_dir=None):
     Write out a well-formed jpyconfig.properties file for easier Java
     integration in a given location.
     """
+    if skip_write_jpy_config:
+        return None
     if not target_dir:
         target_dir = _build_dir()
     
@@ -310,15 +338,15 @@ class JpyInstall(install):
         install.run(self)
 
 
-setup(name='jpy',
-      description='Bi-directional Python-Java bridge',
-             long_description=_read('README.md') + '\n\n' + _read('CHANGES.md'),
+setup(name='deephaven-jpy',
+      description='Deephaven fork of jpy Bi-directional Python-Java bridge',
+             long_description=_read('README-deephaven.md') + '\n\n' + _read('CHANGES.md'),
              version=__version__,
       platforms='Windows, Linux, Darwin',
-      author=__author__,
-      author_email='norman.fomferra@brockmann-consult.de',
-      maintainer='Brockmann Consult GmbH',
-      maintainer_email='norman.fomferra@brockmann-consult.de',
+      author='Deephaven Data Labs',
+      author_email='python@deephaven.io',
+      maintainer='Deephaven Data Labs',
+      maintainer_email='python@deephaven.io',
       license=__license__,
       url='https://github.com/bcdev/jpy',
       download_url='https://pypi.python.org/pypi/jpy/' + __version__,
@@ -361,6 +389,6 @@ setup(name='jpy',
                    'Programming Language :: Python :: 2',
                    'Programming Language :: Python :: 2.7',
                    'Programming Language :: Python :: 3',
-                   'Programming Language :: Python :: 3.3',
-                   'Programming Language :: Python :: 3.4',
-                   'Programming Language :: Python :: 3.5'])
+                   'Programming Language :: Python :: 3.5',
+                   'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7'])
