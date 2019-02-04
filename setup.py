@@ -37,7 +37,24 @@ import jpyutil
 __author__ = jpyutil.__author__
 __copyright__ = jpyutil.__copyright__
 __license__ = jpyutil.__license__
-__version__ = jpyutil.__version__
+
+def lookup_version():
+  uppath = lambda _path, n: os.sep.join(_path.split(os.sep)[:-n])
+  iris_root = uppath(os.path.abspath(__file__), 3)
+  gradle_properties = os.path.join(iris_root, "gradle.properties")
+
+  # todo: would be nicer if python had a parser for java property files
+  # or: if we maintained sym-links instead of gradle.properties/versionSource
+  release_name = subprocess.check_output(["sed", "-n", "/^versionSource\\b/{s/^versionSource.*=//;p;q}", gradle_properties]) \
+    .decode() \
+    .strip()
+
+  release_version = os.path.join(iris_root, 'gradle', 'versions', release_name)
+
+  with open(release_version) as f:
+    return f.read().strip()
+
+__version__ = lookup_version()
 
 base_dir = os.path.dirname(os.path.relpath(__file__))
 src_main_c_dir = os.path.join(base_dir, 'src', 'main', 'c')
@@ -52,6 +69,9 @@ elif 'install' in sys.argv:
 else:
     print('Note that you can use non-standard global option [--maven] '
           'to force a Java Maven build for the jpy Java API')
+
+# todo: consider if we actually need to do this
+skip_write_jpy_config = True
 
 sources = [
     os.path.join(src_main_c_dir, 'jpy_module.c'),
@@ -130,7 +150,7 @@ libraries = [jpyutil.JVM_LIB_NAME]
 
 define_macros = []
 extra_link_args = []
-extra_compile_args = []
+extra_compile_args = ["-std=c99"]
 
 if platform.system() == 'Windows':
     define_macros += [('WIN32', '1')]
@@ -221,6 +241,8 @@ def _write_jpy_config(target_dir=None, install_dir=None):
     Write out a well-formed jpyconfig.properties file for easier Java
     integration in a given location.
     """
+    if skip_write_jpy_config:
+        return None
     if not target_dir:
         target_dir = _build_dir()
     
@@ -310,15 +332,15 @@ class JpyInstall(install):
         install.run(self)
 
 
-setup(name='jpy',
-      description='Bi-directional Python-Java bridge',
-             long_description=_read('README.md') + '\n\n' + _read('CHANGES.md'),
+setup(name='deephaven-jpy',
+      description='Deephaven fork of jpy Bi-directional Python-Java bridge',
+             long_description=_read('README-deephaven.md') + '\n\n' + _read('CHANGES.md'),
              version=__version__,
       platforms='Windows, Linux, Darwin',
-      author=__author__,
-      author_email='norman.fomferra@brockmann-consult.de',
-      maintainer='Brockmann Consult GmbH',
-      maintainer_email='norman.fomferra@brockmann-consult.de',
+      author='Deephaven Data Labs',
+      author_email='python@deephaven.io',
+      maintainer='Deephaven Data Labs',
+      maintainer_email='python@deephaven.io',
       license=__license__,
       url='https://github.com/bcdev/jpy',
       download_url='https://pypi.python.org/pypi/jpy/' + __version__,
@@ -363,4 +385,5 @@ setup(name='jpy',
                    'Programming Language :: Python :: 3',
                    'Programming Language :: Python :: 3.3',
                    'Programming Language :: Python :: 3.4',
-                   'Programming Language :: Python :: 3.5'])
+                   'Programming Language :: Python :: 3.5',
+                   'Programming Language :: Python :: 3.6'])
