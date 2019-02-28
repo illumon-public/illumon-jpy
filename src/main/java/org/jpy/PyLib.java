@@ -177,7 +177,10 @@ public class PyLib {
      * @throws RuntimeException if Python could not be started or if the 'jpy' extension module could not be loaded.
      */
     public static void startPython(String... extraPaths) {
+        startPython(Diag.F_OFF, extraPaths);
+    }
 
+    public static void startPython(int flags, String... extraPaths) {
         ArrayList<File> dirList = new ArrayList<>(1 + extraPaths.length);
 
         File moduleDir = new File(dllFilePath).getParentFile();
@@ -202,7 +205,9 @@ public class PyLib {
             for (String path : extraPaths) {
                 System.out.printf("org.jpy.PyLib:   %s%n", path);
             }
-            Diag.setFlags(Diag.F_EXEC);
+            Diag.setFlags(Diag.F_EXEC | flags);
+        } else if (flags != 0) {
+            Diag.setFlags(flags);
         }
 
         startPython0(extraPaths);
@@ -460,7 +465,10 @@ public class PyLib {
     private PyLib() {
     }
 
+    static void dummyMethodForInitialization() { }
+
     static {
+        PyLibInitializer.pyLibInitialized = true;
         if (DEBUG) System.out.println("org.jpy.PyLib: entered static initializer");
         loadLib();
         if (DEBUG) System.out.println("org.jpy.PyLib: exited static initializer");

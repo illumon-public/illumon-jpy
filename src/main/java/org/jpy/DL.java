@@ -62,10 +62,11 @@ public class DL {
     public static native String dlerror();
 
     static {
+        PyLibInitializer.dlInitialized = true;
         try {
             System.loadLibrary("jdl");
         } catch (Throwable t) {
-            String jdlLibPath = System.getProperty("jpy.jdlLib");
+            String jdlLibPath = System.getProperty(PyLibConfig.JDL_LIB_KEY);
             if (jdlLibPath != null) {
                 System.load(jdlLibPath);
             } else {
