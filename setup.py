@@ -15,7 +15,7 @@
 # limitations under the License.
 import sys
 import os
-import os.path
+import re
 import platform
 import subprocess
 import shutil
@@ -38,21 +38,28 @@ __author__ = jpyutil.__author__
 __copyright__ = jpyutil.__copyright__
 __license__ = jpyutil.__license__
 
+
 def lookup_version():
-  uppath = lambda _path, n: os.sep.join(_path.split(os.sep)[:-n])
-  iris_root = uppath(os.path.abspath(__file__), 3)
-  gradle_properties = os.path.join(iris_root, "gradle.properties")
+    uppath = lambda _path, n: os.sep.join(_path.split(os.sep)[:-n])
+    iris_root = uppath(os.path.abspath(__file__), 3)
+    gradle_properties = os.path.join(iris_root, "gradle.properties")
 
-  # todo: would be nicer if python had a parser for java property files
-  # or: if we maintained sym-links instead of gradle.properties/versionSource
-  release_name = subprocess.check_output(["sed", "-n", "/^versionSource\\b/{s/^versionSource.*=//;p;q}", gradle_properties]) \
-    .decode() \
-    .strip()
+    if not os.path.exists(gradle_properties):
+        raise ValueError("The gradle.properties file does not exist at {}".format(iris_root))
 
-  release_version = os.path.join(iris_root, 'gradle', 'versions', release_name)
+    # fetch the version string from the gradle.properties file
+    with open(gradle_properties, 'r') as f:
+        check = re.search('versionSource=(.*?)\n', f.read().strip())
 
-  with open(release_version) as f:
-    return f.read().strip()
+    if check is None:
+        raise ValueError("The deephaven release version (versionSource=`version`) "
+                         "could not be discovered in {}".format(gradle_properties))
+    release_name = check.group(1)
+
+    release_version = os.path.join(iris_root, 'gradle', 'versions', release_name)
+    with open(release_version, 'r') as f:
+        return f.read().strip()
+
 
 __version__ = lookup_version()
 
@@ -166,12 +173,12 @@ elif platform.system() == 'Darwin':
     extra_link_args += ['-Xlinker', '-rpath', jvm_dll_dir]
 
 
-
 # ----------- Functions -------------
 def _build_dir():
     # this is hacky, but use distutils logic to get build dir. see: distutils.command.build
     plat = ".%s-%d.%d" % (get_platform(), sys.version_info.major, sys.version_info.minor)
     return os.path.join('build', 'lib' + plat)
+
 
 def package_maven():
     """ Run maven package lifecycle """
@@ -221,20 +228,23 @@ def test_python_java_rt():
     return jpyutil._execute_python_scripts(python_java_rt_tests,
                                            env=sub_env)
 
+
 def test_python_java_classes():
     """ Run Python tests against JPY test classes """
     sub_env = {'PYTHONPATH': _build_dir()}
 
     log.info('Executing Python unit tests (against JPY test classes)...')
     return jpyutil._execute_python_scripts(python_java_jpy_tests,
-                                            env=sub_env)
+                                           env=sub_env)
+
 
 def test_maven():
-    jpy_config = os.path.join(_build_dir(),'jpyconfig.properties')
+    jpy_config = os.path.join(_build_dir(), 'jpyconfig.properties')
     mvn_args = '-DargLine=-Xmx512m -Djpy.config=' + jpy_config + ' -Djpy.debug=true'
     log.info("Executing Maven goal 'test' with arg line " + repr(mvn_args))
     code = subprocess.call(['mvn', 'test', mvn_args], shell=platform.system() == 'Windows')
     return code == 0
+
 
 def _write_jpy_config(target_dir=None, install_dir=None):
     """
@@ -245,7 +255,7 @@ def _write_jpy_config(target_dir=None, install_dir=None):
         return None
     if not target_dir:
         target_dir = _build_dir()
-    
+
     args = [sys.executable,
             os.path.join(target_dir, 'jpyutil.py'),
             '--jvm_dll', jvm_dll_file,
@@ -260,24 +270,26 @@ def _write_jpy_config(target_dir=None, install_dir=None):
     log.info('Writing jpy configuration to %s using install_dir %s' % (target_dir, install_dir))
     return subprocess.call(args)
 
+
 def _copy_jpyutil():
     src = os.path.relpath(jpyutil.__file__)
     dest = _build_dir()
     log.info('Copying %s to %s' % (src, dest))
     shutil.copy(src, dest)
 
+
 def _build_jpy():
     package_maven()
     _copy_jpyutil()
     _write_jpy_config()
-    
+
 
 def test_suite():
     suite = unittest.TestSuite()
-    
+
     def test_python_with_java_runtime(self):
         assert 0 == test_python_java_rt()
-        
+
     def test_python_with_java_classes(self):
         assert 0 == test_python_java_classes()
 
@@ -290,10 +302,11 @@ def test_suite():
 
     return suite
 
+
 class MavenBuildCommand(Command):
     """ Custom JPY Maven builder command """
     description = 'run Maven to generate JPY jar'
-    user_options = [] # do not remove, needs to be stubbed out!
+    user_options = []  # do not remove, needs to be stubbed out!
 
     def initialize_options(self):
         pass
@@ -312,12 +325,13 @@ class JpyBuildBeforeTest(test):
     def run(self):
         self.run_command('build')
         self.run_command('maven')
-        
+
         test.run(self)
+
 
 class JpyInstallLib(install_lib):
     """ Custom install_lib command for getting install_dir """
-    
+
     def run(self):
         _write_jpy_config(install_dir=self.install_dir)
         install_lib.run(self)
@@ -325,7 +339,7 @@ class JpyInstallLib(install_lib):
 
 class JpyInstall(install):
     """ Custom install command to trigger Maven steps """
-    
+
     def run(self):
         self.run_command('build')
         self.run_command('maven')
@@ -334,8 +348,8 @@ class JpyInstall(install):
 
 setup(name='deephaven-jpy',
       description='Deephaven fork of jpy Bi-directional Python-Java bridge',
-             long_description=_read('README-deephaven.md') + '\n\n' + _read('CHANGES.md'),
-             version=__version__,
+      long_description=_read('README-deephaven.md') + '\n\n' + _read('CHANGES.md'),
+      version=__version__,
       platforms='Windows, Linux, Darwin',
       author='Deephaven Data Labs',
       author_email='python@deephaven.io',
@@ -363,7 +377,7 @@ setup(name='deephaven-jpy',
                              extra_link_args=extra_link_args,
                              extra_compile_args=extra_compile_args,
                              define_macros=define_macros),
-      ],
+                   ],
       test_suite='setup.test_suite',
       cmdclass={
           'maven': MavenBuildCommand,
@@ -386,4 +400,5 @@ setup(name='deephaven-jpy',
                    'Programming Language :: Python :: 3.3',
                    'Programming Language :: Python :: 3.4',
                    'Programming Language :: Python :: 3.5',
-                   'Programming Language :: Python :: 3.6'])
+                   'Programming Language :: Python :: 3.6',
+                   'Programming Language :: Python :: 3.7'])
