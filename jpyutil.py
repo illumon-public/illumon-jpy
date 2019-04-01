@@ -98,18 +98,28 @@ def _add_paths_if_exists(path_list, *paths):
 
 def _get_module_path(name, fail=False, install_path=None):
     """ Find the path to the jpy jni modules. """
-    import imp
 
-    module = imp.find_module(name)
-    if not module and fail:
-        raise RuntimeError("can't find module '" + name + "'")
-    path = module[1]
-    if not path and fail:
-        raise RuntimeError("module '" + name + "' is missing a file path")
-    
+    if sys.version_info < (3, 4):
+        import imp
+        details = imp.find_module(name)  # this should raise an ImportError if module is not found
+        if details and fail:
+            # Note, I don't think this logic works, since find_module will raise an exception
+            raise RuntimeError("Cannot find module '{}'".format(name))
+        path = details[1]
+        if not path and fail:
+            raise RuntimeError("module '{}' as discovered is missing a file path".format(name))
+    else:
+        import importlib
+        details = importlib.util.find_spec(name)  # this should raise an ImportError if module is not found
+        if hasattr(details, 'has_location') and details.has_location:
+            # we have a loadable origin - it's a package
+            path = os.path.split(details.origin)[0]
+        else:
+            # All other options should raise an exception
+            raise ImportError("Cannot find the location for module '{}'".format(name))
+
     if install_path:
         return os.path.join(install_path, os.path.split(path)[1])
-
     return path
 
 
