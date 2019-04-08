@@ -104,7 +104,7 @@ def _get_module_path(name, fail=False, install_path=None):
         import imp
         try:
             details = imp.find_module(name)  # this should raise an ImportError if module is not found
-            path = details[1]
+            path = os.path.dirname(details[1])
         except ImportError as e:
             if fail:
                 raise e
@@ -114,13 +114,15 @@ def _get_module_path(name, fail=False, install_path=None):
             details = importlib.util.find_spec(name)  # this should raise an ImportError if module is not found
             if hasattr(details, 'has_location') and details.has_location:
                 # we have a loadable origin - it's a package
-                path = os.path.split(details.origin)[0]
+                path = details.origin
+            elif fail:
+                raise ImportError("No loadable module '{}' found".format(name))
         except ImportError as e:
             if fail:
                 raise e
 
     if not path and fail:
-        raise RuntimeError("module '{}' as discovered is missing a file path".format(name))
+        raise ImportError("module '{}' as discovered is missing a file path".format(name))
 
     if path is None or not install_path:
         return path
