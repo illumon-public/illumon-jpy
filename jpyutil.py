@@ -102,24 +102,26 @@ def _get_module_path(name, fail=False, install_path=None):
     path = None
     if sys.version_info < (3, 4):
         import imp
-        details = imp.find_module(name)  # this should raise an ImportError if module is not found
-        if not details:
-            if fail:
-                # Note, I don't think this will ever be reached, since find_module will raise an ImportError
-                raise RuntimeError("Cannot find module '{}'".format(name))
-        else:
+        try:
+            details = imp.find_module(name)  # this should raise an ImportError if module is not found
             path = details[1]
-        if not path and fail:
-            raise RuntimeError("module '{}' as discovered is missing a file path".format(name))
+        except ImportError as e:
+            if fail:
+                raise e
     else:
         import importlib
-        details = importlib.util.find_spec(name)  # this should raise an ImportError if module is not found
-        if hasattr(details, 'has_location') and details.has_location:
-            # we have a loadable origin - it's a package
-            path = os.path.split(details.origin)[0]
-        elif fail:
-            # All other options should raise an exception
-            raise ImportError("Cannot find the location for module '{}'".format(name))
+        try:
+            details = importlib.util.find_spec(name)  # this should raise an ImportError if module is not found
+            if hasattr(details, 'has_location') and details.has_location:
+                # we have a loadable origin - it's a package
+                path = os.path.split(details.origin)[0]
+        except ImportError as e:
+            if fail:
+                raise e
+
+    if not path and fail:
+        raise RuntimeError("module '{}' as discovered is missing a file path".format(name))
+
     if path is None or not install_path:
         return path
     return os.path.join(install_path, os.path.split(path)[1])
