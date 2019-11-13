@@ -218,7 +218,7 @@ public class PyLib {
     }
 
     static native boolean startPython0(String... paths);
-    
+
     /**
      * Does the equivalent of setting the PYTHONHOME environment variable.  If used,
      * this must be called prior to calling {@code startPython()}.
@@ -270,6 +270,10 @@ public class PyLib {
             (String file, int start, Object globals, Object locals) throws FileNotFoundException;
 
     public static native PyObject getMainGlobals();
+
+    public static native PyObject getCurrentGlobals();
+
+    public static native PyObject getCurrentLocals();
 
     static native PyObject copyDict(long pyPointer);
 
@@ -510,6 +514,16 @@ public class PyLib {
         }
     }
 
+    public static PyObject eval(String code, PyInputMode mode) {
+        if (code == null) {
+            throw new NullPointerException("code must not be null");
+        }
+        if (mode == null) {
+            throw new NullPointerException("mode must not be null");
+        }
+        return new PyObject(PyLib.executeCode(code, mode.value(), getCurrentGlobals(), getCurrentLocals()));
+    }
+
     private PyLib() {
     }
 
@@ -529,5 +543,4 @@ public class PyLib {
         if (DEBUG) System.out.println("org.jpy.PyLib: exited static initializer");
     }
 }
-
 
