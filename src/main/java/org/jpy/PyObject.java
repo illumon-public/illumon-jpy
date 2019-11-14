@@ -127,7 +127,7 @@ public class PyObject {
      * @see #doEval(String, Object, Object)
      */
     public static PyObject doEval(String expression) {
-        return doEval(expression, PyLib.getCurrentGlobals(), PyLib.getCurrentLocals());
+        return doEval(expression, PyLib.getGlobals(), PyLib.getCurrentLocals());
     }
 
     /**
@@ -171,7 +171,7 @@ public class PyObject {
      * @see #doExec(String, Object, Object)
      */
     public static void doExec(String code) {
-        doExec(code, PyLib.getCurrentGlobals(), PyLib.getCurrentLocals());
+        doExec(code, PyLib.getGlobals(), PyLib.getCurrentLocals());
     }
 
     /**
