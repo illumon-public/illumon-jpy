@@ -149,7 +149,6 @@ public class PyObject {
     public static PyObject doEval(String expression, Object globals, Object locals) {
         Objects.requireNonNull(expression, "expression must not be null");
         Objects.requireNonNull(globals, "globals must not be null");
-        Objects.requireNonNull(locals, "locals must not be null");
         return new PyObject(PyLib.executeCode(expression, PyInputMode.EXPRESSION.value(), globals, locals));
     }
 
@@ -192,7 +191,6 @@ public class PyObject {
     public static void doExec(String code, Object globals, Object locals) {
         Objects.requireNonNull(code, "code must not be null");
         Objects.requireNonNull(globals, "globals must not be null");
-        Objects.requireNonNull(locals, "locals must not be null");
         PyLib.executeCode(code, PyInputMode.SCRIPT.value(), globals, locals);
     }
 
