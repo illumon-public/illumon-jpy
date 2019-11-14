@@ -542,20 +542,17 @@ JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getMainGlobals
 
 JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getCurrentGlobals
         (JNIEnv *jenv, jclass libClass) {
-     jobject objectRef;
+     jobject objectRef = NULL;
 
     JPy_BEGIN_GIL_STATE
 
     PyObject *globals = PyEval_GetGlobals();
 
-    if (globals == NULL) {
-        return NULL;
+    if (globals != NULL) {
+        if (JType_ConvertPythonToJavaObject(jenv, JPy_JPyObject, globals, &objectRef, JNI_FALSE) < 0) {
+            objectRef = NULL;
+        }
     }
-
-    if (JType_ConvertPythonToJavaObject(jenv, JPy_JPyObject, globals, &objectRef, JNI_FALSE) < 0) {
-        return NULL;
-    }
-
     JPy_END_GIL_STATE
 
     return objectRef;
@@ -563,20 +560,16 @@ JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getCurrentGlobals
 
 JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getCurrentLocals
         (JNIEnv *jenv, jclass libClass) {
-    jobject objectRef;
+    jobject objectRef = NULL;
 
     JPy_BEGIN_GIL_STATE
 
     PyObject *locals = PyEval_GetLocals();
-    if (locals == NULL) {
-        return NULL;
+    if (locals != NULL) {
+        if (JType_ConvertPythonToJavaObject(jenv, JPy_JPyObject, locals, &objectRef, JNI_FALSE) < 0) {
+            return objectRef = NULL;
+        }
     }
-
-
-    if (JType_ConvertPythonToJavaObject(jenv, JPy_JPyObject, locals, &objectRef, JNI_FALSE) < 0) {
-        return NULL;
-    }
-
     JPy_END_GIL_STATE
 
     return objectRef;
