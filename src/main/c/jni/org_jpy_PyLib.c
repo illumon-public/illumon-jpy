@@ -542,11 +542,12 @@ JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getMainGlobals
 
 JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getCurrentGlobals
         (JNIEnv *jenv, jclass libClass) {
-     jobject objectRef;
+    jobject objectRef;
+    PyObject *globals;
 
     JPy_BEGIN_GIL_STATE
 
-    PyObject *globals = PyEval_GetGlobals();
+    globals = PyEval_GetGlobals();
 
     if (globals == NULL) {
         objectRef = NULL;
@@ -566,11 +567,12 @@ error:
 
 JNIEXPORT jobject JNICALL Java_org_jpy_PyLib_getCurrentLocals
         (JNIEnv *jenv, jclass libClass) {
+    PyObject *locals;
     jobject objectRef;
 
     JPy_BEGIN_GIL_STATE
 
-    PyObject *locals = PyEval_GetLocals();
+    locals = PyEval_GetLocals();
     if (locals == NULL) {
         objectRef = NULL;
         goto error;
