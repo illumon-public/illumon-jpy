@@ -8,6 +8,7 @@ import jpy
 class TestEvalExec(unittest.TestCase):
     def setUp(self):
         self.PyObject = jpy.get_type("org.jpy.PyObject")
+        self.PyLib = jpy.get_type("org.jpy.PyLib")
         self.assertIsNotNone(self.PyObject)
 
     def test_foo_42(self):
@@ -35,6 +36,12 @@ class TestEvalExec(unittest.TestCase):
         self.assertTrue("base64" not in sys.modules)
         self.PyObject.doExec("import base64")
         self.assertTrue("base64" in sys.modules)
+
+    def test_current_globals_is_valid(self):
+        self.assertTrue(self.PyLib.getCurrentGlobals() is not None)
+
+    def test_current_locals_is_valid(self):
+        self.assertTrue(self.PyLib.getCurrentLocals() is not None)
 
 if __name__ == '__main__':
     print('\nRunning ' + __file__)
