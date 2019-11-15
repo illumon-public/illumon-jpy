@@ -25,7 +25,7 @@ class TestEvalExec(unittest.TestCase):
 
     def test_inc_baz(self):
         baz = 15
-        self.fixture.statement("baz = baz + 1; self.assertEqual(baz, 16)")
+        self.fixture.script("baz = baz + 1; self.assertEqual(baz, 16)")
         # note: this *is* correct wrt python semantics w/ exec(code, globals(), locals())
         # https://bugs.python.org/issue4831 (Note: it's *not* a bug, is working as intended)
         self.assertEqual(baz, 15)
@@ -33,7 +33,7 @@ class TestEvalExec(unittest.TestCase):
     def test_exec_import(self):
         import sys
         self.assertTrue("base64" not in sys.modules)
-        self.fixture.statement("import base64")
+        self.fixture.script("import base64")
         self.assertTrue("base64" in sys.modules)
 
 if __name__ == '__main__':
