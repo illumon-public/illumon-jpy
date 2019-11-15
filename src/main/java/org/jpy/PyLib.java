@@ -218,7 +218,6 @@ public class PyLib {
      * Does the equivalent of setting the PYTHONHOME environment variable.  If used,
      * this must be called prior to calling {@code startPython()}.
      * Supported for Python 2.7, and Python 3.5 or higher
-     *
      * @param pythonHome Path to Python Home (must be less than 256 characters!)
      * @return true if successful, false if it fails
      */
@@ -227,7 +226,6 @@ public class PyLib {
     /**
      * Useful for virtual environments, helps in setting sys.prefix/exec_prefix.
      * If used, this must be called prior to calling {@code startPython()}.
-     *
      * @param programName Path to Python executable (must be less than 256 characters!)
      * @return true if successful, false if it fails
      * @see <a href="https://docs.python.org/2/c-api/init.html#c.Py_SetProgramName">Py_SetProgramName (2)</a>
@@ -277,22 +275,6 @@ public class PyLib {
      * @see <a href="https://docs.python.org/3/c-api/reflection.html#c.PyEval_GetGlobals">PyEval_GetGlobals (3)</a>
      */
     public static native PyObject getCurrentGlobals();
-
-
-    /**
-     * Return a dictionary of the global variables in the current execution frame, or main globals if PyEval_GetGlobals
-     * returns NULL
-     *
-     * @return the de factor globals
-     */
-    public static PyObject getGlobals() {
-
-        PyObject result = getCurrentGlobals();
-        if (result == null) {
-            return getMainGlobals();
-        }
-        return result;
-    }
 
     /**
      * Return a dictionary of the local variables in the current execution frame, or NULL if no
@@ -357,7 +339,6 @@ public class PyLib {
     /**
      * https://docs.python.org/2/c-api/dict.html#c.PyDict_Keys
      * https://docs.python.org/3/c-api/dict.html#c.PyDict_Keys
-     *
      * @return Return a PyListObject containing all the keys from the dictionary.
      */
     static native PyObject pyDictKeys(long pointer);
@@ -365,7 +346,6 @@ public class PyLib {
     /**
      * https://docs.python.org/2/c-api/dict.html#c.PyDict_Values
      * https://docs.python.org/3/c-api/dict.html#c.PyDict_Values
-     *
      * @return Return a PyListObject containing all the values from the dictionary p.
      */
     static native PyObject pyDictValues(long pointer);
@@ -373,7 +353,7 @@ public class PyLib {
     /**
      * Determine if dictionary dict contains key.
      * This is equivalent to the Python expression `key in dict`
-     * <p>
+     *
      * https://docs.python.org/2/c-api/dict.html#c.PyDict_Contains
      * https://docs.python.org/3/c-api/dict.html#c.PyDict_Contains
      *
@@ -559,12 +539,11 @@ public class PyLib {
 
     /**
      * We call this method to ensure that this class gets loaded, and thus the static block gets run
-     * <p>
+     *
      * We don't technically need this method. Callers could instead rely on reflection, using
      * {@link Class#forName(String)}, but this method is better because it is much more explicit.
      */
-    static void dummyMethodForInitialization() {
-    }
+    static void dummyMethodForInitialization() { }
 
     static {
         // see documentation in PyLibInitializer for explanation
