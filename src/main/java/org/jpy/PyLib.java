@@ -305,23 +305,14 @@ public class PyLib {
     static native Object getObjectValue(long pointer);
 
     static native boolean isConvertible(long pointer);
-
     static native boolean pyNoneCheck(long pointer);
-
     static native boolean pyDictCheck(long pointer);
-
     static native boolean pyListCheck(long pointer);
-
     static native boolean pyBoolCheck(long pointer);
-
     static native boolean pyIntCheck(long pointer);
-
     static native boolean pyLongCheck(long pointer);
-
     static native boolean pyFloatCheck(long pointer);
-
     static native boolean pyStringCheck(long pointer);
-
     static native boolean pyCallableCheck(long pointer);
 
     static native long getType(long pointer);
